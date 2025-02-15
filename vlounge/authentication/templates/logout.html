@@ -1,6 +1,46 @@
 {% extends 'base.html' %}
 {% block title %} Logout {% endblock %}
 {% block content %}
+<style>
+    /* Background and Container Styling */
+body {
+    background-color: #4CAF50; /* Green background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background-color: white; /* White card background */
+    padding: 2rem;
+    border-radius: 15px; /* Curved edges */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    width: 100%;
+    max-width: 400px; /* Limit card width */
+    text-align: center; /* Center-align text */
+}
+
+/* Heading Styling */
+h2 {
+    color: #333; /* Dark gray text */
+    margin-bottom: 1.5rem;
+}
+
+/* Link Styling */
+p a {
+    color: #4CAF50; /* Green link */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+p a:hover {
+    color: #45a049; /* Darker green on hover */
+}
+</style>
 <div class="container mt-5">
     <h2>You have been logged out</h2>
     <p><a href="{% url 'login' %}">Log in again</a></p>
