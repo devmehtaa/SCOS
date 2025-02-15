@@ -1,6 +1,88 @@
 {% extends 'base.html' %}
 {% block title%}Login {% endblock %}
 {% block content %}
+<style> 
+    /* Background and Container Styling */
+body {
+    background-color: #4CAF50; /* Green background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background-color: white; /* White card background */
+    padding: 2rem;
+    border-radius: 15px; /* Curved edges */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    width: 100%;
+    max-width: 400px; /* Limit card width */
+}
+
+/* Heading Styling */
+h2 {
+    text-align: center;
+    color: #333; /* Dark gray text */
+    margin-bottom: 1.5rem;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input Field Styling */
+.form-control {
+    padding: 0.75rem;
+    border: 1px solid #ddd; /* Light gray border */
+    border-radius: 8px; /* Curved edges for inputs */
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4CAF50; /* Green border on focus */
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* Green glow */
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: #4CAF50; /* Green button */
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px; /* Curved edges for button */
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Forgot Password Link Styling */
+p.mt-3 {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+p.mt-3 a {
+    color: #4CAF50; /* Green link */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+p.mt-3 a:hover {
+    color: #45a049; /* Darker green on hover */
+}
+</style>
 <div class="container mt-5">
     <h2>Login</h2>
     <form method="POST">
