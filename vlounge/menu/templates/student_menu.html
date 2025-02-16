@@ -1,21 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Today's Menu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Menu</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+<style>
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 1200px;
+        margin: 20px;
+    }
+
+    h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* Menu Grid */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    /* Dish Card Styles */
+    .dish-card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .dish-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .dish-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .dish-name {
+        font-size: 1.2rem;
+        margin: 10px 0;
+        color: #333;
+    }
+
+    .dish-price {
+        font-size: 1rem;
+        color: #4CAF50;
+        margin: 5px 0;
+    }
+
+    .dish-availability {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .quantity-selector {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .quantity-selector button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .quantity-selector button:hover {
+        background-color: #45a049;
+    }
+
+    .quantity-selector input {
+        width: 50px;
+        text-align: center;
+        margin: 0 10px;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .add-to-cart {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+
+    .add-to-cart:hover {
+        background-color: #45a049;
+    }
+
+    .add-to-cart:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
 <body>
-    <h1>Today's Menu</h1>
-    
-    <ul>
-        {% for item in todays_menu %}
-            <li>
-                {{ item.name }} - ${{ item.price }}
-                <form method="post" action="{% url 'place_order' item.id %}">
-                    {% csrf_token %}
-                    <button type="submit">Order</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1>Student Menu</h1>
+
+        <!-- Menu Grid -->
+        <div class="menu-grid">
+            <!-- Dish Card 1 -->
+            <div class="dish-card">
+                <h3 class="dish-name">Noodles</h3>
+                <p class="dish-price">$5</p>
+                <p class="dish-availability">Available</p>
+                <div class="quantity-selector">
+                    <button onclick="decrementQuantity('noodles')">-</button>
+                    <input type="number" id="noodles-quantity" value="1" min="1" max="10">
+                    <button onclick="incrementQuantity('noodles')">+</button>
+                </div>
+                <button class="add-to-cart">Add to Cart</button>
+            </div>
+
+
+    <script>
+        // JavaScript to handle quantity increment and decrement
+        function incrementQuantity(dish) {
+            const quantityInput = document.getElementById(`${dish}-quantity`);
+            if (quantityInput.value < 10) {
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+            }
+        }
+
+        function decrementQuantity(dish) {
+            const quantityInput = document.getElementById(`${dish}-quantity`);
+            if (quantityInput.value > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+            }
+        }
+    </script>
 </body>
 </html>
