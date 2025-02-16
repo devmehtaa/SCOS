@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Pending Orders</h2>
+<table border="1">
+    <tr>
+        <th>Student</th>
+        <th>Food Item</th>
+        <th>Quantity</th>
+        <th>Status</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.student.username }}</td>
+        <td>{{ order.food_item.name }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.status }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">No pending orders.</td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

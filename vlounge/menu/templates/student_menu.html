@@ -12,9 +12,12 @@
                 {{ item.name }} - ${{ item.price }}
                 <form method="post" action="{% url 'place_order' item.id %}">
                     {% csrf_token %}
-                    <button type="submit">Order</button>
+                    <input type="number" name="quantity" min="1" value="1" required> 
+                    <button type="submit">Order Now</button>
                 </form>
             </li>
+        {% empty %}
+            <li>No items in today's menu.</li>
         {% endfor %}
     </ul>
 </body>
