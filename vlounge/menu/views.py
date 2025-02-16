@@ -12,8 +12,9 @@ def menu_home(request):
     
 @login_required
 def staff_home(request):
-    all_items = FoodItem.objects.all()  # Fetch all food items
-    todays_menu = FoodItem.objects.filter(is_todays_menu=True)  # Fetch only today's menu items
+    all_items = FoodItem.objects.filter(is_todays_menu=False)  # Fetch all food items
+    todays_menu = FoodItem.objects.filter(is_todays_menu=True)
+    
 
     context = {
         'all_items': all_items,
@@ -41,3 +42,10 @@ def remove_from_todays_menu(request, item_id):
     food_item.is_todays_menu = False  # Remove from today's menu
     food_item.save()
     return redirect('staff_home')
+
+@login_required
+def add_to_todays_menu(request, item_id):
+    food_item = get_object_or_404(FoodItem, id=item_id) 
+    food_item.is_todays_menu = True  # Remove from today's menu
+    food_item.save()
+    return redirect('staff_home') 

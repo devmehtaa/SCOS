@@ -33,10 +33,10 @@
         {% for item in all_items %}
             <li>
                 {{ item.name }} - ${{ item.price }}
-                {% comment %} <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
+                 <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
                     {% csrf_token %}
                     <button type="submit">Add to Today's Menu</button>
-                </form> {% endcomment %}
+                </form> 
             </li>
         {% empty %}
             <li>All items are already in today's menu.</li>
