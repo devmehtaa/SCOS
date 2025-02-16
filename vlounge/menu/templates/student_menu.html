@@ -132,6 +132,24 @@
     }
 </style>
 <body>
+
+    <h1>Today's Menu</h1>
+    
+    <ul>
+        {% for item in todays_menu %}
+            <li>
+                {{ item.name }} - ${{ item.price }}
+                <form method="post" action="{% url 'place_order' item.id %}">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" min="1" value="1" required> 
+                    <button type="submit">Order Now</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>No items in today's menu.</li>
+        {% endfor %}
+    </ul>
+
     <div class="container">
         <h1>Student Menu</h1>
 

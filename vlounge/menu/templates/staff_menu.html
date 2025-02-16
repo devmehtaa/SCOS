@@ -116,6 +116,44 @@ h3 {
 }
 </style>
 <body>
+
+    <h1>Manage Today's Menu</h1>
+
+    <!-- Button to create a new food item -->
+    <a href="{% url 'create_food_item' %}">
+        <button>Create New Food Item</button>
+    </a>
+
+    <h2>Today's Menu</h2>
+    <ul>
+        {% for item in todays_menu %}
+            <li>
+                {{ item.name }} - ${{ item.price }}
+                <form method="post" action="{% url 'remove_from_todays_menu' item.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Remove from Today's Menu</button>
+                </form> 
+            </li>
+        {% empty %}
+            <li>No items in today's menu.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>All Food Items </h2>
+    <ul>
+        {% for item in all_items %}
+            <li>
+                {{ item.name }} - ${{ item.price }}
+                 <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Add to Today's Menu</button>
+                </form> 
+            </li>
+        {% empty %}
+            <li>All items are already in today's menu.</li>
+        {% endfor %}
+    </ul>
+
     <div class="container">
         <h2>Menu Management</h2>
 
