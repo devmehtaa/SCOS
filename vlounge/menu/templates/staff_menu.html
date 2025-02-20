@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Management</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
     /* General Styles */
@@ -116,15 +117,16 @@ h3 {
 }
 </style>
 <body>
+    {% include 'navbar_staff.html'%}
 
-    <h1>Manage Today's Menu</h1>
+    {% comment %} <h1>Manage Today's Menu</h1> {% endcomment %}
 
     <!-- Button to create a new food item -->
-    <a href="{% url 'create_food_item' %}">
+    {% comment %} <a href="{% url 'create_food_item' %}">
         <button>Create New Food Item</button>
-    </a>
+    </a> {% endcomment %}
 
-    <h2>Today's Menu</h2>
+    {% comment %} <h2>Today's Menu</h2>
     <ul>
         {% for item in todays_menu %}
             <li>
@@ -137,9 +139,9 @@ h3 {
         {% empty %}
             <li>No items in today's menu.</li>
         {% endfor %}
-    </ul>
+    </ul> {% endcomment %}
 
-    <h2>All Food Items </h2>
+    {% comment %} <h2>All Food Items </h2>
     <ul>
         {% for item in all_items %}
             <li>
@@ -152,7 +154,7 @@ h3 {
         {% empty %}
             <li>All items are already in today's menu.</li>
         {% endfor %}
-    </ul>
+    </ul> {% endcomment %}
 
     <div class="container">
         <h2>Menu Management</h2>
@@ -160,10 +162,11 @@ h3 {
         <!-- All Food Items Section -->
         <h3>All Food Items</h3>
         <ul class="food-list">
-            <li>Noodles - $5 <button class="button">Add to Today's Menu</button></li>
-            <li>Manchurian - $6 <button class="button">Add to Today's Menu</button></li>
-            <li>Dosa - $4 <button class="button">Add to Today's Menu</button></li>
-            <li>Idli - $3 <button class="button">Add to Today's Menu</button></li>
+            {% for item in all_items %}
+            <li>{{ item.name }} - Rs.{{ item.price }} <form method="post" action="{% url 'add_to_todays_menu' item.id %}">{% csrf_token %} <button class="button">Add to Today's Menu</button></form></li>
+            {% empty %}
+            <li>All items are already in today's menu.</li>
+            {% endfor %}
         </ul>
 
         <!-- Today's Menu Section -->
@@ -178,26 +181,28 @@ h3 {
                 </tr>
             </thead>
             <tbody>
+                {% for item in todays_menu %}
                 <tr>
-                    <td><input type="text" class="input-field" value="Noodles" readonly></td>
-                    <td><input type="number" class="input-field" value="5" readonly></td>
+                    <td><input type="text" class="input-field" value="{{ item.name }}" readonly></td>
+                    <td><input type="number" class="input-field" value="{{ item.price }}" readonly></td>
                     <td><input type="checkbox" checked></td>
-                    <td><button class="button remove">Remove</button></td>
+                    <form method="post" action="{% url 'remove_from_todays_menu' item.id %}">{% csrf_token %}<td><button class="button remove">Remove</button></td></form>
                 </tr>
-                <tr>
-                    <td><input type="text" class="input-field" value="Manchurian" readonly></td>
-                    <td><input type="number" class="input-field" value="6" readonly></td>
-                    <td><input type="checkbox" checked></td>
-                    <td><button class="button remove">Remove</button></td>
-                </tr>
+                {% endfor %}
+                
+                
             </tbody>
         </table>
 
         <!-- Add New Dish Section -->
         <h3>Add New Dish</h3>
+        <form method="post" action="{% url 'create_food_item' %}">
+        {% csrf_token %}
         <input type="text" class="input-field" placeholder="Dish Name">
         <input type="number" class="input-field" placeholder="Price">
         <button class="button">Add</button>
+        </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

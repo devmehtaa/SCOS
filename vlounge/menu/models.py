@@ -18,3 +18,12 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.student.username} - {self.food_item.name} ({self.status})"
+    
+class Cart(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE)  # Student who placed the order
+    food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)  # Ordered food item
+    quantity = models.PositiveIntegerField(default=1)  # Order quantity
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student.username} - {self.food_item.name}"
