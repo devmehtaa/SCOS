@@ -147,9 +147,9 @@
                 <form method="post" action="{% url 'add_to_cart' item.id %}">
                     {% csrf_token %}
                     <div class="quantity-selector">
-                        <button onclick="decrementQuantity({{ item.name }})">-</button>
-                        <input type="number" id="{{ item.name }}-quantity" value="1" min="1" max="10">
-                        <button onclick="incrementQuantity({{ item.name }})">+</button>
+                        <button type="button" onclick="decrementQuantity('{{ item.id }}')">-</button>
+                        <input type="number" id="quantity-{{ item.id }}" name="quantity" value="1" min="1" max="10">
+                        <button type="button" onclick="incrementQuantity('{{ item.id }}')">+</button>
                     </div>
                 
                     <button type="submit" class="add-to-cart">Add to Cart</button>
@@ -162,15 +162,15 @@
 
     <script>
         // JavaScript to handle quantity increment and decrement
-        function incrementQuantity(dish) {
-            const quantityInput = document.getElementById(`${dish}-quantity`);
+        function incrementQuantity(itemId) {
+            const quantityInput = document.getElementById(`quantity-${itemId}`);
             if (quantityInput.value < 10) {
                 quantityInput.value = parseInt(quantityInput.value) + 1;
             }
         }
-
-        function decrementQuantity(dish) {
-            const quantityInput = document.getElementById(`${dish}-quantity`);
+        
+        function decrementQuantity(itemId) {
+            const quantityInput = document.getElementById(`quantity-${itemId}`);
             if (quantityInput.value > 1) {
                 quantityInput.value = parseInt(quantityInput.value) - 1;
             }
