@@ -53,10 +53,9 @@ def student_home(request):
 
 def place_order(request, cart_id):
     # food_item = get_object_or_404(FoodItem, id=item_id)
-    cart = Cart.objects.get(id=id)
-    total = 0
-    for price in cart.food_item.price:
-        total += price
+    cart = Cart.objects.get(id=cart_id)
+    total = sum(item.food_item.price * item.quantity for item in Cart.objects.filter(student=request.user))
+
     context = {'item' : cart.food_item,
                'quantity' : cart.quantity,
                'total' : total
@@ -76,13 +75,14 @@ def staff_orders(request):
     #         order.status = new_status
     return render(request, 'staff_orders.html', {'orders': orders})
 
-# def update_order_status(request, id):
+def update_order_status(request, order_id):
     print("update ran")
     orders = Order.objects.filter(status="Pending") 
     if request.method == 'POST':
         new_status = request.POST.get("status")
-        order = Order.objects.get(id)
+        order = get_object_or_404(Order, id=order_id)
         order.status = new_status
+        order.save()
     return render(request, 'staff_orders.html', {'orders': orders})
 
 
@@ -93,9 +93,11 @@ def add_to_cart(request, item_id):
     food_item = get_object_or_404(FoodItem, id=item_id)
     if request.method == "POST":
         quantity = int(request.POST.get("quantity", 1)) 
-        Cart.objects.create(student=request.user, food_item=food_item, quantity=quantity)
-        cart_id = (Cart.objects.get(student=request.user)).id
-        return redirect('place_order' ,cart_id=cart_id) 
+        cart_item, created = Cart.objects.get_or_create(student=request.user, food_item=food_item, defaults={'quantity': quantity})
+        if not created:
+            cart_item.quantity += quantity  
+            cart_item.save()
+        return redirect('place_order' ,cart_id=cart_item.id) 
     context = {'item': food_item}
     return render(request, 'student_menu.html', context)
 
