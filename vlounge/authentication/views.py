@@ -38,6 +38,20 @@ def logout_view(request):
     return redirect("login")
 
 
-# Password Reset View (Basic - You may extend with Django’s built-in functionality)
+# Password Reset View 
 def password_reset_view(request):
     return render(request, "password_reset.html")
+
+def account_view(request):
+    user = request.user
+    if user.permissions == 'staff':
+        status = "staff"
+    else:
+        status = "student"
+
+    context = {'username':user.username,
+               'last_login':user.last_login,
+               'date_joined':user.date_joined,
+               'status':status
+               }
+    return render(request, "account.html", context)

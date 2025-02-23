@@ -12,13 +12,12 @@ def menu_home(request):
     
 @login_required
 def staff_home(request):
+    print("this ran")
     all_items = FoodItem.objects.filter(is_todays_menu=False)  # Fetch all food items
     todays_menu = FoodItem.objects.filter(is_todays_menu=True)
-    
-
     context = {
         'all_items': all_items,
-        'todays_menu': todays_menu,
+        'todays_menu': todays_menu
     }
     return render(request, 'staff_menu.html', context)
 
@@ -69,10 +68,21 @@ def place_order(request, cart_id):
 
 
 def staff_orders(request):
+    print("normal ran")
+    orders = Order.objects.filter(status="Pending") 
+    # if request.method == 'POST':
+    #         new_status = request.POST.get("status")
+    #         order = Order.objects.get(id)
+    #         order.status = new_status
+    return render(request, 'staff_orders.html', {'orders': orders})
+
+# def update_order_status(request, id):
+    print("update ran")
     orders = Order.objects.filter(status="Pending") 
     if request.method == 'POST':
-        order = Order.objects.get(id=id)
-        order.status = "Completed"
+        new_status = request.POST.get("status")
+        order = Order.objects.get(id)
+        order.status = new_status
     return render(request, 'staff_orders.html', {'orders': orders})
 
 
@@ -86,7 +96,7 @@ def add_to_cart(request, item_id):
         Cart.objects.create(student=request.user, food_item=food_item, quantity=quantity)
         cart_id = (Cart.objects.get(student=request.user)).id
         return redirect('place_order' ,cart_id=cart_id) 
-    context = {'food_item': food_item}
+    context = {'item': food_item}
     return render(request, 'student_menu.html', context)
 
 
