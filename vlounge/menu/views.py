@@ -10,6 +10,7 @@ def menu_home(request):
     else:
         return redirect('student_home')  # Redirect students to student home
     
+# staff section------------------------
 @login_required
 def staff_home(request):
     print("this ran")
@@ -46,25 +47,6 @@ def add_to_todays_menu(request, item_id):
     food_item.save()
     return redirect('staff_home') 
 
-def student_home(request):
-    todays_menu = FoodItem.objects.filter(is_todays_menu=True)  
-    return render(request, 'student_menu.html', {'todays_menu':todays_menu})  
-
-
-def place_order(request, cart_id):
-    # food_item = get_object_or_404(FoodItem, id=item_id)
-    cart = Cart.objects.get(id=cart_id)
-    total = sum(item.food_item.price * item.quantity for item in Cart.objects.filter(student=request.user))
-
-    context = {'item' : cart.food_item,
-               'quantity' : cart.quantity,
-               'total' : total
-               }
-    if request.method == 'POST':
-        order = Order.objects.create(cart=cart, total=total)
-        order.save()
-    return render(request, 'cart.html', context)
-
 
 def staff_orders(request):
     print("normal ran")
@@ -85,6 +67,26 @@ def update_order_status(request, order_id):
         order.save()
     return render(request, 'staff_orders.html', {'orders': orders})
 
+# student section--------------------
+def student_home(request):
+    todays_menu = FoodItem.objects.filter(is_todays_menu=True)  
+    return render(request, 'student_menu.html', {'todays_menu':todays_menu})  
+
+
+def place_order(request, cart_id):
+    # food_item = get_object_or_404(FoodItem, id=item_id)
+    cart = Cart.objects.get(id=cart_id)
+    total = sum(item.food_item.price * item.quantity for item in Cart.objects.filter(student=request.user))
+
+    context = {'item' : cart.food_item,
+               'quantity' : cart.quantity,
+               'total' : total
+               }
+    if request.method == 'POST':
+        order = Order.objects.create(cart=cart, total=total)
+        order.save()
+    return render(request, 'cart.html', context)
+
 
 def thanks(request):
     return render(request, 'thanks.html')
@@ -100,6 +102,8 @@ def add_to_cart(request, item_id):
         return redirect('place_order' ,cart_id=cart_item.id) 
     context = {'item': food_item}
     return render(request, 'student_menu.html', context)
+
+
 
 
 
