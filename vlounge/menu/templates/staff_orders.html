@@ -117,13 +117,13 @@
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.status }}</td>
                 <td>
-                    <form action="{% url 'staff_orders' %}" method="POST">
+            <form action="{% url 'update_order_status' order.id %}" method="POST">
                         {% csrf_token %}
-                    <select class="status-dropdown" name="status"> 
-                        <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
-                        <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
-                    </select>
+                        <select class="status-dropdown" name="status"> 
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="Prepring" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                            <option value="Completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
                 </td>
                 <td><input type="submit" value="Submit"></td>
             </form>

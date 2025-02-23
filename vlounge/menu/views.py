@@ -76,13 +76,14 @@ def staff_orders(request):
     #         order.status = new_status
     return render(request, 'staff_orders.html', {'orders': orders})
 
-# def update_order_status(request, id):
+def update_order_status(request, order_id):
     print("update ran")
     orders = Order.objects.filter(status="Pending") 
     if request.method == 'POST':
         new_status = request.POST.get("status")
-        order = Order.objects.get(id)
+        order = get_object_or_404(Order, id=order_id)
         order.status = new_status
+        order.save()
     return render(request, 'staff_orders.html', {'orders': orders})
 
 
