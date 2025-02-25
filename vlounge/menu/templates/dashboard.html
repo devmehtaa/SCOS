@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <!-- ✅ Material Design Components (MDC) -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script defer src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+    <!-- ✅ Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: auto;
+        }
+
+        .dashboard-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .dashboard-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .timeline-dropdown {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.9rem;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="dashboard-title">📊 Admin Dashboard</h2>
+
+        <!-- ✅ Order & Revenue Stats -->
+        <div class="grid">
+            <div class="dashboard-card">
+                <h3>🟡 Pending Orders</h3>
+                <select class="timeline-dropdown" onchange="updateStats('pending_orders', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="pending_orders">{{ pending_orders_count }}</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>🟢 Ready Orders</h3>
+                <select class="timeline-dropdown" onchange="updateStats('ready_orders', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="ready_orders">{{ ready_orders_count }}</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>✅ Completed Orders</h3>
+                <select class="timeline-dropdown" onchange="updateStats('completed_orders', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="completed_orders">{{ completed_orders_count }}</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>💰 Total Revenue</h3>
+                <select class="timeline-dropdown" onchange="updateStats('total_revenue', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="total_revenue">₹{{ total_revenue }}</p>
+            </div>
+        </div>
+
+        <!-- ✅ User Stats -->
+        <div class="grid">
+            <div class="dashboard-card">
+                <h3>👤 Total Users</h3>
+                <select class="timeline-dropdown" onchange="updateStats('total_users', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="total_users">{{ total_users }}</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>🆕 New Signups</h3>
+                <select class="timeline-dropdown" onchange="updateStats('new_users', this.value)">
+                    <option value="all">All Time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <p class="dashboard-value" id="new_users">{{ new_users_count }}</p>
+            </div>
+        </div>
+
+        <!-- ✅ Order Status Chart -->
+        <div class="chart-container">
+            <h3>📦 Order Status Overview</h3>
+            <canvas id="orderStatusChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h3>⏳ Orders Placed Per Hour</h3>
+            <canvas id="ordersPerHourChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ✅ JavaScript -->
+    <script>
+        function updateStats(statType, timeframe) {
+            fetch(`/api/dashboard-stats?stat=${statType}&timeframe=${timeframe}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(statType).innerText = data.value;
+            })
+            .catch(error => console.error('Error fetching stats:', error));
+        }
+
+        // Order Status Chart
+        const orderStatusChart = new Chart(document.getElementById("orderStatusChart"), {
+            type: "bar",
+            data: {
+                labels: ["Pending", "Ready", "Completed"],
+                datasets: [{
+                    label: "Orders",
+                    data: [{{ pending_orders_count }}, {{ ready_orders_count }}, {{ completed_orders_count }}],
+                    backgroundColor: ["#FFC107", "#2196F3", "#4CAF50"]
+                }]
+            }
+        });
+
+        
+    </script>
+
+</body>
+</html>

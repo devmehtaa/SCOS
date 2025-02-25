@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import JsonResponse
+from django.db.models import Sum
+from django.utils.timezone import now, timedelta
+from django.contrib.auth.models import User
 from .models import FoodItem, Order, Cart
 from .forms import FoodItemForm
 import razorpay
@@ -78,6 +81,83 @@ def update_order_status(request, order_id):
         order.save()
         return redirect('staff_orders')
     return render(request, 'staff_orders.html')
+
+def get_filtered_orders(timeframe):
+    """Fetches filtered order stats based on timeframe."""
+    timeframe_map = {
+        "daily": now() - timedelta(days=1),
+        "weekly": now() - timedelta(weeks=1),
+        "monthly": now() - timedelta(days=30),
+        "quarterly": now() - timedelta(days=90),
+        "yearly": now() - timedelta(days=365),
+        "all": None
+    }
+
+    filter_time = timeframe_map.get(timeframe, None)
+
+    if filter_time:
+        orders = Order.objects.filter(created_at__gte=filter_time)
+    else:
+        orders = Order.objects.all()
+
+    pending_orders_count = orders.filter(status="Pending").count()
+    ready_orders_count = orders.filter(status="Ready").count()
+    completed_orders_count = orders.filter(status="Completed").count()
+    total_revenue = orders.filter(status="Completed").aggregate(Sum('total_price'))['total_price__sum'] or 0
+
+    return pending_orders_count, ready_orders_count, completed_orders_count, total_revenue
+
+def get_filtered_users(timeframe):
+    """Fetches filtered user stats based on timeframe."""
+    timeframe_map = {
+        "daily": now() - timedelta(days=1),
+        "weekly": now() - timedelta(weeks=1),
+        "monthly": now() - timedelta(days=30),
+        "quarterly": now() - timedelta(days=90),
+        "yearly": now() - timedelta(days=365),
+        "all": None
+    }
+
+    filter_time = timeframe_map.get(timeframe, None)
+    total_users = User.objects.count()
+    new_users_count = User.objects.filter(date_joined__gte=filter_time).count() if filter_time else total_users
+
+    return total_users, new_users_count
+
+def dashboard(request):
+    
+    pending_orders_count, ready_orders_count, completed_orders_count, total_revenue = get_filtered_orders("all")
+    total_users, new_users_count = get_filtered_users("all")
+
+    recent_orders = Order.objects.order_by("-created_at")[:5]
+
+    context = {
+        "pending_orders_count": pending_orders_count,
+        "ready_orders_count": ready_orders_count,
+        "completed_orders_count": completed_orders_count,
+        "total_revenue": total_revenue,
+        "total_users": total_users,
+        "new_users_count": new_users_count,
+        "recent_orders": recent_orders
+    }
+
+    return render(request, "dashboard.html", context)
+
+# def dashboard_stats_api(request):
+#     """API endpoint to fetch stats dynamically based on timeframe selection."""
+#     timeframe = request.GET.get("timeframe", "all")
+
+#     pending_orders_count, ready_orders_count, completed_orders_count, total_revenue = get_filtered_orders(timeframe)
+#     total_users, new_users_count = get_filtered_users(timeframe)
+
+#     return JsonResponse({
+#         "pending_orders_count": pending_orders_count,
+#         "ready_orders_count": ready_orders_count,
+#         "completed_orders_count": completed_orders_count,
+#         "total_revenue": total_revenue,
+#         "total_users": total_users,
+#         "new_users_count": new_users_count
+#     })
 
 # student section--------------------
 def student_home(request):
