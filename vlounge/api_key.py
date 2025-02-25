@@ -1,0 +1,1 @@
+zaporpay_link = "https://dashboard.razorpay.com/app/onboarding/api-keys"

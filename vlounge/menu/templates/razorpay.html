@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form id="razorpay-form">
+        {% csrf_token %}
+        <button type="button" id="pay-btn" class="checkout-btn">Pay with Razorpay</button>
+    </form>
+    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.getElementById("pay-btn").onclick = function () {
+            fetch("{% url 'create_razorpay_order' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.order_id) {
+                    var options = {
+                        "key": "{{ RAZORPAY_KEY_ID }}",
+                        "amount": data.amount,
+                        "currency": data.currency,
+                        "name": "Smart Canteen",
+                        "description": "Order Payment",
+                        "order_id": data.order_id,
+                        "handler": function (response) {
+                            window.location.href = "/payment-success/";
+                        },
+                        "theme": {
+                            "color": "#3399cc"
+                        }
+                    };
+                    var rzp = new Razorpay(options);
+                    rzp.open();
+                } else {
+                    alert("Error creating Razorpay order!");
+                }
+            });
+        };
+    </script>
+    
+</body>
+</html>
