@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management</title>
+
+    <!-- ✅ Material Design Components (MDC) -->
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+    <script defer src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: "Roboto", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* MDC Table */
+        .mdc-data-table {
+            width: 100%;
+        }
+
+        /* Low Stock Alerts */
+        .alert {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .btn-update {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-update:hover {
+            background-color: #388E3C;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="title">📦 Stock Management</h2>
+
+        <!-- ✅ Low Stock Alerts -->
+        {% for stock in low_stock_items %}
+            <div class="alert">
+                ⚠️ <strong>{{ stock.food_item.name }}</strong> is running low! ({{ stock.quantity }} left)
+            </div>
+        {% empty %}
+            <p>No stock alerts. ✅</p>
+        {% endfor %}
+
+        <table class="mdc-data-table">
+            <thead>
+                <tr>
+                    <th class="mdc-data-table__header-cell">Food Item</th>
+                    <th class="mdc-data-table__header-cell">Quantity</th>
+                    <th class="mdc-data-table__header-cell">Reorder Level</th>
+                    <th class="mdc-data-table__header-cell">Last Updated</th>
+                    <th class="mdc-data-table__header-cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stock_items %}
+                <tr class="mdc-data-table__row">
+                    <td class="mdc-data-table__cell">{{ stock.food_item.name }}</td>
+                    <td class="mdc-data-table__cell">{{ stock.quantity }}</td>
+                    <td class="mdc-data-table__cell">{{ stock.reorder_level }}</td>
+                    <td class="mdc-data-table__cell">{{ stock.last_updated }}</td>
+                    <td class="mdc-data-table__cell">
+                        <form method="POST" action="{% url 'update_stock' stock.id %}">
+                            {% csrf_token %}
+                            <input type="number" name="new_quantity" min="0" required class="mdc-text-field__input">
+                            <button type="submit" class="btn-update">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
