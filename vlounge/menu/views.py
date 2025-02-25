@@ -82,6 +82,8 @@ def update_order_status(request, order_id):
         return redirect('staff_orders')
     return render(request, 'staff_orders.html')
 
+# dashboard apis -----------
+
 def get_filtered_orders(timeframe):
     """Fetches filtered order stats based on timeframe."""
     timeframe_map = {
@@ -143,6 +145,7 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
+
 # def dashboard_stats_api(request):
 #     """API endpoint to fetch stats dynamically based on timeframe selection."""
 #     timeframe = request.GET.get("timeframe", "all")
@@ -158,6 +161,12 @@ def dashboard(request):
 #         "total_users": total_users,
 #         "new_users_count": new_users_count
 #     })
+
+# dashboard apis end here-----------
+
+
+def stock_dasboard(request):
+    return render(request, 'stock_dashboard.html')
 
 # student section--------------------
 def student_home(request):
