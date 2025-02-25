@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pending Orders</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
     <style>
-        <style>
-            /* General Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -19,7 +19,7 @@
             align-items: center;
             height: 100vh;
         }
-        
+
         .container {
             background-color: white;
             padding: 20px;
@@ -28,27 +28,21 @@
             width: 100%;
             max-width: 600px;
         }
-        
+
         h2, h3 {
             color: #333;
         }
-        
-        h2 {
-            margin-bottom: 20px;
-        }
-        
+
         h3 {
             margin-top: 20px;
             margin-bottom: 10px;
         }
-        
-        /* Food List Styles */
-        .food-list {
-            list-style-type: none;
-            padding: 0;
+
+        .mdc-list {
+            width: 100%;
         }
-        
-        .food-list li {
+
+        .mdc-list-item {
             background-color: #f9f9f9;
             padding: 10px;
             margin-bottom: 10px;
@@ -57,116 +51,93 @@
             justify-content: space-between;
             align-items: center;
         }
-        
-        /* Button Styles */
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+
+        .mdc-button {
+            margin-top: 10px;
         }
-        
-        .button:hover {
-            background-color: #45a049;
-        }
-        
-        .button.remove {
-            background-color: #f44336;
-        }
-        
-        .button.remove:hover {
-            background-color: #d32f2f;
-        }
-        
-        /* Table Styles */
-        .menu-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        .menu-table th, .menu-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .menu-table th {
-            background-color: #f4f4f4;
-        }
-        
-        .menu-table td {
-            background-color: white;
-        }
-        
-        /* Input Field Styles */
-        .input-field {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .input-field:read-only {
-            background-color: #f9f9f9;
-            cursor: not-allowed;
-        }
-        </style>
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- ✅ Navbar -->
     {% include 'navbar_staff.html' %}
 
-    <h3>All Food Items</h3>
-        <ul class="food-list">
+    <div class="container">
+        <!-- ✅ All Food Items -->
+        <h3>All Food Items</h3>
+        <ul class="mdc-list">
             {% for item in all_items %}
-            <li>{{ item.name }} - Rs.{{ item.price }} <form method="post" action="{% url 'add_to_todays_menu' item.id %}">{% csrf_token %} <button class="button">Add to Today's Menu</button></form></li>
+            <li class="mdc-list-item">
+                {{ item.name }} - ₹{{ item.price }}
+                <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
+                    {% csrf_token %}
+                    <button class="mdc-button mdc-button--raised mdc-button--primary">Add to Today's Menu</button>
+                </form>
+            </li>
             {% empty %}
-            <li>All items are already in today's menu.</li>
+            <li class="mdc-list-item">All items are already in today's menu.</li>
             {% endfor %}
         </ul>
 
-        <!-- Today's Menu Section -->
+        <!-- ✅ Today's Menu -->
         <h3>Today's Menu</h3>
-        <table class="menu-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Dish</th>
-                        <th>Price</th>
-                        <th>Available</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in todays_menu %}
-                    <tr>
-                        <td><input type="text" class="input-field" value="{{ item.name }}" readonly></td>
-                        <td><input type="number" class="input-field" value="{{ item.price }}" readonly></td>
-                        <td><input type="checkbox" checked></td>
-                        <form method="post" action="{% url 'remove_from_todays_menu' item.id %}">{% csrf_token %}<td><button class="button remove">Remove</button></td></form>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <h3>Add New Dish</h3>
+        <table class="mdc-data-table">
+            <thead>
+                <tr>
+                    <th class="mdc-data-table__header-cell">Dish</th>
+                    <th class="mdc-data-table__header-cell">Price</th>
+                    <th class="mdc-data-table__header-cell">Available</th>
+                    <th class="mdc-data-table__header-cell">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in todays_menu %}
+                <tr class="mdc-data-table__row">
+                    <td class="mdc-data-table__cell">
+                        <input type="text" class="mdc-text-field__input" value="{{ item.name }}" readonly>
+                    </td>
+                    <td class="mdc-data-table__cell">
+                        <input type="number" class="mdc-text-field__input" value="{{ item.price }}" readonly>
+                    </td>
+                    <td class="mdc-data-table__cell">
+                        <div class="mdc-checkbox">
+                            <input type="checkbox" class="mdc-checkbox__native-control" checked />
+                            <div class="mdc-checkbox__background"></div>
+                        </div>
+                    </td>
+                    <td class="mdc-data-table__cell">
+                        <form method="post" action="{% url 'remove_from_todays_menu' item.id %}">
+                            {% csrf_token %}
+                            <button class="mdc-button mdc-button--raised mdc-button--secondary">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- ✅ Add New Dish -->
+        <h3>Add New Dish</h3>
         <form method="post" action="{% url 'create_food_item' %}">
-        {% csrf_token %}
-        <input type="text" class="input-field" placeholder="Dish Name">
-        <input type="number" class="input-field" placeholder="Price">
-        <button class="button">Add</button>
+            {% csrf_token %}
+            {% comment %} <label class="mdc-text-field mdc-text-field--outlined">
+                <input type="text" class="mdc-text-field__input" placeholder="Dish Name">
+                <span class="mdc-floating-label">Dish Name</span>
+                <span class="mdc-line-ripple"></span>
+            </label>
+
+            <label class="mdc-text-field mdc-text-field--outlined">
+                <input type="number" class="mdc-text-field__input" placeholder="Price">
+                <span class="mdc-floating-label">Price</span>
+                <span class="mdc-line-ripple"></span>
+            </label> {% endcomment %}
+
+            <button class="mdc-button mdc-button--raised mdc-button--primary">Add</button>
         </form>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JS -->
+    <!-- ✅ Custom JavaScript -->
     <script>
-        // JavaScript to handle status updates
+        // JavaScript to handle order status updates
         function updateStatus(orderId, status) {
             fetch(`/update-order-status/${orderId}/`, {
                 method: 'POST',

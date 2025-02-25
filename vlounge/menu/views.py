@@ -54,22 +54,30 @@ def add_to_todays_menu(request, item_id):
 
 def staff_orders(request):
     print("normal ran")
-    orders = Order.objects.filter(status="Pending") 
+    pending_orders = Order.objects.filter(status="Pending") 
+    ready_orders = Order.objects.filter(status="ready") 
+    completed_orders = Order.objects.filter(status="Completed") 
+    context = {
+        'pending_orders': pending_orders,
+        'ready_orders': ready_orders,
+        'completed_orders': completed_orders
+    }
+
     # if request.method == 'POST':
     #         new_status = request.POST.get("status")
     #         order = Order.objects.get(id)
     #         order.status = new_status
-    return render(request, 'staff_orders.html', {'orders': orders})
+    return render(request, 'staff_orders.html', context)
 
 def update_order_status(request, order_id):
     print("update ran")
-    orders = Order.objects.filter(status="Pending") 
     if request.method == 'POST':
         new_status = request.POST.get("status")
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
         order.save()
-    return render(request, 'staff_orders.html', {'orders': orders})
+        return redirect('staff_orders')
+    return render(request, 'staff_orders.html')
 
 # student section--------------------
 def student_home(request):
@@ -141,7 +149,27 @@ def create_razorpay_order(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 def payment_success(request):
-    Cart.objects.filter(student=request.user).delete()  
+    
+    cart_items = Cart.objects.filter(student=request.user)
+    if not cart_items.exists():
+        return render(request, 'payment_success.html', {"error": "Cart is empty."})
+    for cart in cart_items:
+        existing_order = Order.objects.filter(student=cart.student, food_item=cart.food_item, status="Pending").first()
+
+        if existing_order:
+            existing_order.quantity += cart.quantity
+            existing_order.total_price += cart.food_item.price * cart.quantity  # Update total price
+            existing_order.save()
+        else:
+            
+            Order.objects.create(
+                student=cart.student,
+                food_item=cart.food_item,
+                quantity=cart.quantity,
+                total_price=cart.food_item.price * cart.quantity,  
+                status="Pending"
+            )
+    cart_items.delete()
     return render(request, 'payment_success.html')
     
 
