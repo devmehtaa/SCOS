@@ -12,7 +12,7 @@ class FoodItem(models.Model):
 class Order(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)  # Student who placed the order
     food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)  # Ordered food item
-    quantity = models.PositiveIntegerField(default=1)  # Order quantity
+    quantity = models.PositiveIntegerField(default=1)  
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Preparing', 'Preparing'), ('Completed', 'Completed')], default='Pending')  # Order status
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -22,7 +22,7 @@ class Order(models.Model):
 class Cart(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)  # Student who placed the order
     food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)  # Ordered food item
-    quantity = models.PositiveIntegerField(default=1)  # Order quantity
+    quantity = models.PositiveIntegerField(default=1)  
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

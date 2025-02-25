@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.http import JsonResponse
 from .models import FoodItem, Order, Cart
 from .forms import FoodItemForm
+import razorpay
+
 
 @login_required
 def menu_home(request):
@@ -73,18 +77,11 @@ def student_home(request):
     return render(request, 'student_menu.html', {'todays_menu':todays_menu})  
 
 
-def place_order(request, cart_id):
-    # food_item = get_object_or_404(FoodItem, id=item_id)
-    cart = Cart.objects.get(id=cart_id)
-    total = sum(item.food_item.price * item.quantity for item in Cart.objects.filter(student=request.user))
+def place_order(request):
+    cart_items = Cart.objects.filter(student=request.user)  # Fetch all cart items
+    total_price = sum(item.food_item.price * item.quantity for item in cart_items)
 
-    context = {'item' : cart.food_item,
-               'quantity' : cart.quantity,
-               'total' : total
-               }
-    if request.method == 'POST':
-        order = Order.objects.create(cart=cart, total=total)
-        order.save()
+    context = {'cart_items': cart_items, 'total_price': total_price}
     return render(request, 'cart.html', context)
 
 
@@ -93,16 +90,64 @@ def thanks(request):
 
 def add_to_cart(request, item_id):
     food_item = get_object_or_404(FoodItem, id=item_id)
-    if request.method == "POST":
-        quantity = int(request.POST.get("quantity", 1)) 
-        cart_item, created = Cart.objects.get_or_create(student=request.user, food_item=food_item, defaults={'quantity': quantity})
-        if not created:
-            cart_item.quantity += quantity  
-            cart_item.save()
-        return redirect('place_order' ,cart_id=cart_item.id) 
-    context = {'item': food_item}
-    return render(request, 'student_menu.html', context)
 
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity", 1))
+        cart_item, created = Cart.objects.get_or_create(
+            student=request.user, food_item=food_item, defaults={'quantity': quantity}
+        )
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        return redirect('place_order')  
+
+    return render(request, 'student_menu.html', {'item': food_item})
+
+def remove_from_cart(request):
+    if request.method == 'POST':
+        student = request.user
+        item_id = request.POST.get('item_id')
+        if not item_id:
+            return redirect('place_order')
+        cart_item = get_object_or_404(Cart, student=student, id=item_id)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+        return redirect('place_order')
+    
+
+def create_razorpay_order(request):
+    if request.method == "POST":
+        cart_items = Cart.objects.filter(student=request.user)
+
+        if not cart_items.exists():
+            return JsonResponse({"error": "Cart is empty"}, status=400)
+
+        total_amount = sum(item.food_item.price * item.quantity for item in cart_items) * 100  # Convert to paise
+
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        order_data = {
+            "amount": int(total_amount),
+            "currency": "INR",
+            "payment_capture": "1"  
+        }
+        order = client.order.create(order_data)
+
+        return JsonResponse({"order_id": order["id"], "amount": total_amount, "currency": "INR"})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def payment_success(request):
+    Cart.objects.filter(student=request.user).delete()  
+    return render(request, 'payment_success.html')
+    
+
+        
+
+        
 
 
 
