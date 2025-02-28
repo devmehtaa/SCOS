@@ -1,16 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background-color: #1a1a1a !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+        }
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: #ffffff !important;
+            margin: 0 1rem;
+            transition: color 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover {
+            color: #4CAF50 !important;
+        }
+
+        .nav-link.active {
+            color: #4CAF50 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            
+            <a class="navbar-brand" href="#">🍽️ Smart Canteen</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'student_home' %}">menu</a>
+                        <a class="nav-link" href="{% url 'student_home' %}">Menu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'authentication:account' %}">menu</a>
+                        <a class="nav-link" href="{% url 'cart' %}">Cart</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'authentication:account' %}">Account</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

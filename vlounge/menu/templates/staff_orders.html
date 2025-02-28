@@ -4,214 +4,241 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Dashboard</title>
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         h2 {
-            color: #333;
+            color: #ffffff;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            font-weight: 600;
         }
 
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-
-        /* Dropdown & Button Styles */
-        .status-dropdown {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 0.9rem;
-        }
-
-        .status-button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin: 2px;
-            transition: background-color 0.3s ease;
-        }
-
-        .status-button:hover {
-            opacity: 0.9;
-        }
-
-        /* No Orders Message */
-        .no-orders {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
-
-        /* Section Styling */
         .orders-section {
-            margin-bottom: 40px;
+            background-color: #1E1E1E;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .section-title {
-            background-color: #2196F3;
+            background-color: #4CAF50;
             color: white;
-            padding: 10px;
+            padding: 1rem;
             text-align: center;
             font-size: 1.2rem;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
         }
 
-        .completed-title {
+        .section-title.ready {
+            background-color: #2196F3;
+        }
+
+        .section-title.completed {
+            background-color: #757575;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-bottom: 1rem;
+        }
+
+        th {
+            color: #B0B0B0;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        td {
+            padding: 1rem;
+            background-color: #2D2D2D;
+            color: #ffffff;
+        }
+
+        tr:hover td {
+            background-color: #363636;
+        }
+
+        tr td:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        tr td:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .status-dropdown {
+            background-color: #2D2D2D;
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            min-width: 120px;
+        }
+
+        .status-dropdown:focus {
+            outline: none;
+            border-color: #45a049;
+        }
+
+        .update-btn {
             background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
         }
 
+        .update-btn:hover {
+            background-color: #45a049;
+        }
+
+        .no-orders {
+            text-align: center;
+            color: #B0B0B0;
+            font-style: italic;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
-
     {% include 'navbar_staff.html' %}
 
-    <!-- Pending Orders Section -->
-    <div class="orders-section">
-        <h2 class="section-title">Pending Orders</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Food Item</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in pending_orders %}
-                <tr>
-                    <td>{{ order.student.username }}</td>
-                    <td>{{ order.food_item.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.status }}</td>
-                    <td>
-                        <form action="{% url 'update_order_status' order.id %}" method="POST">
-                            {% csrf_token %}
-                            <select class="status-dropdown" name="status"> 
-                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
-                                <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
-                            </select>
-                            <input type="submit" value="Update">
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="no-orders">No pending orders.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <div class="container">
+        <div class="orders-section">
+            <h2 class="section-title">📋 Pending Orders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Food Item</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in pending_orders %}
+                    <tr>
+                        <td>{{ order.student.username }}</td>
+                        <td>{{ order.food_item.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>
+                            <form action="{% url 'update_order_status' order.id %}" method="POST">
+                                {% csrf_token %}
+                                <select class="status-dropdown" name="status" title="Order status"> 
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                                    <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                                <button type="submit" class="update-btn">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="no-orders">No pending orders at the moment. 🎉</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Ready Orders Section -->
-    <div class="orders-section">
-        <h2 class="section-title">Ready Orders</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Food Item</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in ready_orders %}
-                <tr>
-                    <td>{{ order.student.username }}</td>
-                    <td>{{ order.food_item.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.status }}</td>
-                    <td>
-                        <form action="{% url 'update_order_status' order.id %}" method="POST">
-                            {% csrf_token %}
-                            <select class="status-dropdown" name="status"> 
-                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
-                                <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
-                            </select>
-                            <input type="submit" value="Update">
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="no-orders">No ready orders.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="orders-section">
+            <h2 class="section-title ready">🔔 Ready for Pickup</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Food Item</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in ready_orders %}
+                    <tr>
+                        <td>{{ order.student.username }}</td>
+                        <td>{{ order.food_item.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>
+                            <form action="{% url 'update_order_status' order.id %}" method="POST">
+                                {% csrf_token %}
+                                <select class="status-dropdown" name="status" title="Order status"> 
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                                    <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                                <button type="submit" class="update-btn">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="no-orders">No orders ready for pickup. 🕒</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Recently Completed Orders Section -->
-    <div class="orders-section">
-        <h2 class="section-title completed-title">Recently Completed Orders</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Food Item</th>
-                    <th>Quantity</th>
-                    {% comment %} <th>Completed At</th> {% endcomment %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in completed_orders %}
-                <tr>
-                    <td>{{ order.student.username }}</td>
-                    <td>{{ order.food_item.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    {% comment %} <td>{{ order.completed_at }}</td> {% endcomment %}
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="no-orders">No completed orders.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="orders-section">
+            <h2 class="section-title completed">✅ Recently Completed</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Food Item</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in completed_orders %}
+                    <tr>
+                        <td>{{ order.student.username }}</td>
+                        <td>{{ order.food_item.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="no-orders">No completed orders to show. 📝</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </body>
 </html>
