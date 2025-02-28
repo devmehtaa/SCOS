@@ -142,7 +142,9 @@
             {% for item in todays_menu %}
             <div class="dish-card">
                 <h3 class="dish-name">{{ item.name }}</h3>
-                <p class="dish-price">{{ item.price }}</p>
+                <p class="dish-price">Rs.{{ item.price }}</p>
+                <p class="dish-price">Desc: {{ item.description }}</p>
+                <p class="dish-price">Calories: {{ item.calories }}</p>
                 <p class="dish-availability">Available</p>
                 <form method="post" action="{% url 'add_to_cart' item.id %}">
                     {% csrf_token %}

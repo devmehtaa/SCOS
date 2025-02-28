@@ -20,6 +20,9 @@ class FoodItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_todays_menu = models.BooleanField(default=False) 
     ingredients = models.ManyToManyField(Stock, through='FoodIngredient')
+    calories = models.PositiveIntegerField(default=1)  
+    photo = models.ImageField(upload_to='food_photos/', null=True, blank=True)  
+    description = models.TextField(blank=True)
 
 
     def __str__(self):

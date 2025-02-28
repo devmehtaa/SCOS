@@ -18,5 +18,6 @@ urlpatterns = [
     path('create-razorpay-order/', views.create_razorpay_order, name='create_razorpay_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path('dashboard/', views.dashboard, name="dashboard"),
-    path('staff/stock/', views.stock_dasboard, name='stock_dashboard')
+    path('staff/stock/', views.stock_dasboard, name='stock_dashboard'),
+    path('fetch_calories/', views.fetch_calories, name="fetch_calories")
 ]
