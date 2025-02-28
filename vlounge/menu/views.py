@@ -249,7 +249,7 @@ def student_home(request):
 
 
 def place_order(request):
-    cart_items = Cart.objects.filter(student=request.user)  # Fetch all cart items
+    cart_items = Cart.objects.filter(student=request.user)  
     total_price = sum(item.food_item.price * item.quantity for item in cart_items)
 
     context = {'cart_items': cart_items, 'total_price': total_price}

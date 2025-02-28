@@ -1,6 +1,10 @@
 from django.urls import path
 from . import views
 from django.shortcuts import render
+# from authentication.views import account_view
+
+# app_name = "authentication"
+
 
 urlpatterns = [
     path('', views.menu_home, name='menu_home'),

@@ -132,7 +132,7 @@
     }
 </style>
 <body>
-
+{% comment %} {% include 'navbar_student.html' %} {% endcomment %}
     <div class="container">
         <h1>Student Menu</h1>
 
@@ -143,6 +143,7 @@
             <div class="dish-card">
                 <h3 class="dish-name">{{ item.name }}</h3>
                 <p class="dish-price">Rs.{{ item.price }}</p>
+                <p class="dish-price">Rs.{{ item.photo }}</p>
                 <p class="dish-price">Desc: {{ item.description }}</p>
                 <p class="dish-price">Calories: {{ item.calories }}</p>
                 <p class="dish-availability">Available</p>
