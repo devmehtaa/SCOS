@@ -35,6 +35,23 @@
         margin-bottom: 20px;
     }
 
+    /* Header Styles */
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header h2 {
+        font-size: 2rem;
+        color: #4CAF50;
+        margin-bottom: 10px;
+    }
+
+    .header p {
+        font-size: 1.2rem;
+        color: #666;
+    }
+
     /* Menu Grid */
     .menu-grid {
         display: grid;
@@ -54,13 +71,6 @@
 
     .dish-card:hover {
         transform: translateY(-5px);
-    }
-
-    .dish-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 10px;
     }
 
     .dish-name {
@@ -132,17 +142,22 @@
     }
 </style>
 <body>
-
     <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h2>VLOUNGE</h2>
+            <p>Less Waiting, More Tasting</p>
+        </div>
+
         <h1>Student Menu</h1>
 
         <!-- Menu Grid -->
         <div class="menu-grid">
-            <!-- Dish Card 1 -->
+            <!-- Dish Cards -->
             {% for item in todays_menu %}
             <div class="dish-card">
                 <h3 class="dish-name">{{ item.name }}</h3>
-                <p class="dish-price">{{ item.price }}</p>
+                <p class="dish-price">Rs. {{ item.price }}</p>
                 <p class="dish-availability">Available</p>
                 <form method="post" action="{% url 'add_to_cart' item.id %}">
                     {% csrf_token %}
@@ -151,14 +166,14 @@
                         <input type="number" id="quantity-{{ item.id }}" name="quantity" value="1" min="1" max="10">
                         <button type="button" onclick="incrementQuantity('{{ item.id }}')">+</button>
                     </div>
-                
                     <button type="submit" class="add-to-cart">Add to Cart</button>
                 </form>
             </div>
             {% empty %}
             <li>No items in today's menu.</li>
             {% endfor %}
-
+        </div>
+    </div>
 
     <script>
         // JavaScript to handle quantity increment and decrement
@@ -168,7 +183,7 @@
                 quantityInput.value = parseInt(quantityInput.value) + 1;
             }
         }
-        
+
         function decrementQuantity(itemId) {
             const quantityInput = document.getElementById(`quantity-${itemId}`);
             if (quantityInput.value > 1) {
