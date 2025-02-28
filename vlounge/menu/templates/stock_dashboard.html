@@ -50,7 +50,7 @@
             margin: 10px 0;
         }
 
-        .btn-update {
+        .btn-update, .btn-create {
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -58,10 +58,18 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .btn-update:hover {
+        .btn-update:hover, .btn-create:hover {
             background-color: #388E3C;
+        }
+
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -69,6 +77,12 @@
 
     <div class="container">
         <h2 class="title">📦 Stock Management</h2>
+
+        <!-- ✅ Top Actions (Create New Stock Button) -->
+        {% comment %} <div class="top-actions">
+            <p></p> <!-- Empty placeholder for alignment -->
+            <a href="{% url 'create_stock' %}" class="btn-create">➕ Create New Stock Item</a>
+        </div> {% endcomment %}
 
         <!-- ✅ Low Stock Alerts -->
         {% for stock in low_stock_items %}
@@ -92,8 +106,8 @@
             <tbody>
                 {% for stock in stock_items %}
                 <tr class="mdc-data-table__row">
-                    <td class="mdc-data-table__cell">{{ stock.food_item.name }}</td>
-                    <td class="mdc-data-table__cell">{{ stock.quantity }}</td>
+                    <td class="mdc-data-table__cell">{{ stock.name }}</td>
+                    <td class="mdc-data-table__cell">{{ stock.quantity_available }}</td>
                     <td class="mdc-data-table__cell">{{ stock.reorder_level }}</td>
                     <td class="mdc-data-table__cell">{{ stock.last_updated }}</td>
                     <td class="mdc-data-table__cell">
