@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.utils.timezone import now, timedelta
 from django.contrib.auth.models import User
-from .models import FoodItem, Order, Cart
+from .models import FoodItem, Order, Cart, Stock, FoodIngredient
 from .forms import FoodItemForm
 import razorpay
 
@@ -166,7 +166,11 @@ def dashboard(request):
 
 
 def stock_dasboard(request):
-    return render(request, 'stock_dashboard.html')
+    stock = Stock.objects.all()
+    context = {
+        "stock_items": stock
+    }
+    return render(request, 'stock_dashboard.html', context)
 
 # student section--------------------
 def student_home(request):

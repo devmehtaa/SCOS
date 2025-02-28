@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Stock Item</title>
+
+    <!-- ✅ Material Design Components (MDC) -->
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+    <script defer src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: "Roboto", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .mdc-text-field {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn-submit, .btn-back {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-submit:hover, .btn-back:hover {
+            background-color: #388E3C;
+        }
+
+        .btn-back {
+            background-color: #d32f2f;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover {
+            background-color: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="title">➕ Add New Stock Item</h2>
+
+        <form method="POST" action="{% url 'create_stock' %}">
+            {% csrf_token %}
+
+            <label class="mdc-text-field">
+                <input type="text" name="name" class="mdc-text-field__input" required>
+                <span class="mdc-floating-label">Stock Name (e.g., Flour, Cheese)</span>
+            </label>
+
+            <label class="mdc-text-field">
+                <input type="number" name="quantity_available" class="mdc-text-field__input" min="0" required>
+                <span class="mdc-floating-label">Available Quantity</span>
+            </label>
+
+            <label class="mdc-text-field">
+                <select name="unit" class="mdc-text-field__input" required>
+                    <option value="kg">Kilograms (kg)</option>
+                    <option value="g">Grams (g)</option>
+                    <option value="l">Liters (l)</option>
+                    <option value="ml">Milliliters (ml)</option>
+                </select>
+                <span class="mdc-floating-label">Unit</span>
+            </label>
+
+            <br><br>
+            <button type="submit" class="btn-submit">✅ Add Stock</button>
+        </form>
+
+        <a href="{% url 'stock_management' %}" class="btn-back">⬅ Back to Stock List</a>
+    </div>
+
+</body>
+</html>
