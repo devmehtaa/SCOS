@@ -4,146 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pending Orders</title>
-
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
+        }
+
+        .page-content {
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 80px;
         }
 
         .container {
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
             width: 100%;
-            max-width: 600px;
-        }
-
-        h2, h3 {
-            color: #333;
+            max-width: 750px;
+            margin: 0 auto;
         }
 
         h3 {
-            margin-top: 20px;
-            margin-bottom: 10px;
+            margin-top: 28px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.23rem;
         }
 
         .mdc-list {
             width: 100%;
+            margin-bottom: 18px;
         }
 
         .mdc-list-item {
             background-color: #f9f9f9;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .mdc-data-table {
+            width: 100%;
+            background: white;
+            margin-bottom: 20px;
+        }
+        .mdc-data-table th, .mdc-data-table td {
+            padding: 10px 12px;
+            text-align: left;
+        }
+        .mdc-data-table tr {
+            border-bottom: 1px solid #eee;
+        }
+
         .mdc-button {
-            margin-top: 10px;
+            margin-top: 6px;
+        }
+        .mdc-text-field {
+            display: block;
+            margin: 18px 0 8px 0;
+        }
+        form label {
+            width: 100%;
+        }
+        .actions-cell {
+            display: flex;
+            gap: 6px;
         }
     </style>
 </head>
 <body>
-    <!-- ✅ Navbar -->
     {% include 'navbar_staff.html' %}
 
-    <div class="container">
-        <!-- ✅ All Food Items -->
-        <h3>All Food Items</h3>
-        <ul class="mdc-list">
-            {% for item in all_items %}
-            <li class="mdc-list-item">
-                {{ item.name }} - ₹{{ item.price }}
-                <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
-                    {% csrf_token %}
-                    <button class="mdc-button mdc-button--raised mdc-button--primary">Add to Today's Menu</button>
-                </form>
-            </li>
-            {% empty %}
-            <li class="mdc-list-item">All items are already in today's menu.</li>
-            {% endfor %}
-        </ul>
+    <div class="page-content">
+        <div class="container">
 
-        <!-- ✅ Today's Menu -->
-        <h3>Today's Menu</h3>
-        <table class="mdc-data-table">
-            <thead>
-                <tr>
-                    <th class="mdc-data-table__header-cell">Dish</th>
-                    <th class="mdc-data-table__header-cell">Price</th>
-                    <th class="mdc-data-table__header-cell">Available</th>
-                    <th class="mdc-data-table__header-cell">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in todays_menu %}
-                <tr class="mdc-data-table__row">
-                    <td class="mdc-data-table__cell">
-                        <input type="text" class="mdc-text-field__input" value="{{ item.name }}" readonly>
-                    </td>
-                    <td class="mdc-data-table__cell">
-                        <input type="number" class="mdc-text-field__input" value="{{ item.price }}" readonly>
-                    </td>
-                    <td class="mdc-data-table__cell">
-                        <div class="mdc-checkbox">
-                            <input type="checkbox" class="mdc-checkbox__native-control" checked />
-                            <div class="mdc-checkbox__background"></div>
-                        </div>
-                    </td>
-                    <td class="mdc-data-table__cell">
-                        <form method="post" action="{% url 'remove_from_todays_menu' item.id %}">
-                            {% csrf_token %}
-                            <button class="mdc-button mdc-button--raised mdc-button--secondary">Remove</button>
-                        </form>
-                    </td>
-                </tr>
+            <!-- Food Items Section -->
+            <h3>All Food Items</h3>
+            <ul class="mdc-list">
+                {% for item in all_items %}
+                <li class="mdc-list-item">
+                    <span>{{ item.name }} - ₹{{ item.price }}</span>
+                    <form method="post" action="{% url 'add_to_todays_menu' item.id %}">
+                        {% csrf_token %}
+                        <button class="mdc-button mdc-button--raised mdc-button--primary">
+                            Add to Today's Menu
+                        </button>
+                    </form>
+                </li>
+                {% empty %}
+                <li class="mdc-list-item">All items are already in today's menu.</li>
                 {% endfor %}
-            </tbody>
-        </table>
+            </ul>
 
-        <!-- ✅ Add New Dish -->
-        <h3>Add New Dish</h3>
-        <form method="post" action="{% url 'create_food_item' %}">
-            {% csrf_token %}
-            {% comment %} <label class="mdc-text-field mdc-text-field--outlined">
-                <input type="text" class="mdc-text-field__input" placeholder="Dish Name">
-                <span class="mdc-floating-label">Dish Name</span>
-                <span class="mdc-line-ripple"></span>
-            </label>
+            <!-- Today's Menu Section -->
+            <h3>Today's Menu</h3>
+<table class="mdc-data-table" style="width:100%; min-width:340px;">
+    <thead>
+        <tr>
+            <th>Dish</th>
+            <th>Price</th>
+            <th style="text-align: right;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in todays_menu %}
+        <tr>
+            <td style="vertical-align: middle;">{{ item.name }}</td>
+            <td style="vertical-align: middle;">{{ item.price }}</td>
+            <td style="vertical-align: middle; text-align: right;">
+                <form method="post" action="{% url 'remove_from_todays_menu' item.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="mdc-button mdc-button--raised mdc-button--secondary">
+                        REMOVE
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-            <label class="mdc-text-field mdc-text-field--outlined">
-                <input type="number" class="mdc-text-field__input" placeholder="Price">
-                <span class="mdc-floating-label">Price</span>
-                <span class="mdc-line-ripple"></span>
-            </label> {% endcomment %}
+            <!-- Add New Dish Section -->
+            <h3>Add New Dish</h3>
+            <form method="post" action="{% url 'create_food_item' %}">
+                {% csrf_token %}
+                <label class="mdc-text-field mdc-text-field--outlined">
+                    <input type="text" class="mdc-text-field__input" name="name" required>
+                    <span class="mdc-floating-label">Dish Name</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                <label class="mdc-text-field mdc-text-field--outlined">
+                    <input type="number" class="mdc-text-field__input" name="price" required step="0.01">
+                    <span class="mdc-floating-label">Price</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+                <button type="submit" class="mdc-button mdc-button--raised mdc-button--primary">
+                    Add
+                </button>
+            </form>
 
-            <button class="mdc-button mdc-button--raised mdc-button--primary">Add</button>
-        </form>
+        </div>
     </div>
 
-    <!-- ✅ Custom JavaScript -->
     <script>
-        // JavaScript to handle order status updates
         function updateStatus(orderId, status) {
             fetch(`/update-order-status/${orderId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token for Django
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({ status: status })
             })
@@ -151,7 +171,7 @@
             .then(data => {
                 if (data.success) {
                     alert(`Order status updated to ${status}.`);
-                    location.reload(); // Refresh the page to reflect the updated status
+                    location.reload();
                 } else {
                     alert('Failed to update order status.');
                 }

@@ -23,5 +23,6 @@ urlpatterns = [
     path('payment-success/', views.payment_success, name='payment_success'),
     path('dashboard/', views.dashboard, name="dashboard"),
     path('staff/stock/', views.stock_dasboard, name='stock_dashboard'),
-    path('fetch_calories/', views.fetch_calories, name="fetch_calories")
+    path('fetch_calories/', views.fetch_calories, name="fetch_calories"),
+    path("stock/manage/", views.stock_management_view, name="stock_management"),
 ]

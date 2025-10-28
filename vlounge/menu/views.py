@@ -9,6 +9,10 @@ from .models import FoodItem, Order, Cart, Stock, FoodIngredient
 from .forms import FoodItemForm
 import razorpay
 import requests
+from django.http import HttpResponse, HttpResponseBadRequest
+import json
+from django.views.decorators.csrf import csrf_exempt
+from razorpay.errors import SignatureVerificationError
 
 
 @login_required
@@ -103,12 +107,8 @@ def create_food_item(request):
         form = FoodItemForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('staff_home')  
-    else:
-        form = FoodItemForm()
-    print("this is getting called ")
-
-    return render(request, 'create_food_item.html', {'form': form})
+            return redirect('staff_home')
+    return redirect('staff_home')
 
 @login_required
 def remove_from_todays_menu(request, item_id):
@@ -245,14 +245,57 @@ def stock_dasboard(request):
 # student section--------------------
 def student_home(request):
     todays_menu = FoodItem.objects.filter(is_todays_menu=True)  
+    print(f"DEBUG: User logged in: {request.user.is_authenticated}") 
+    print(f"DEBUG: User object: {request.user}") 
     return render(request, 'student_menu.html', {'todays_menu':todays_menu})  
 
 
 def place_order(request):
-    cart_items = Cart.objects.filter(student=request.user)  
-    total_price = sum(item.food_item.price * item.quantity for item in cart_items)
+    cart_items_display = []
+    total_price = 0
 
-    context = {'cart_items': cart_items, 'total_price': total_price}
+    if request.user.is_authenticated:
+        # ✅ SCENARIO A: Fetch from DB for logged-in users
+        cart_items_queryset = Cart.objects.filter(student=request.user).select_related('food_item')
+        
+        for item in cart_items_queryset:
+            subtotal = item.food_item.price * item.quantity
+            total_price += subtotal
+            cart_items_display.append({
+                'item': item.food_item,
+                'quantity': item.quantity,
+                'subtotal': subtotal,
+                'db_id': item.id, # Used for removal/checkout for DB items
+                'is_session_item': False
+            })
+
+    else:
+        # 👤 SCENARIO B: Fetch from Session for anonymous users
+        session_cart = request.session.get('cart', {})
+        for item_id_str, data in session_cart.items():
+            try:
+                # Look up the food item details needed for display
+                food_item = FoodItem.objects.get(id=int(item_id_str))
+                subtotal = food_item.price * data['quantity']
+                total_price += subtotal
+                cart_items_display.append({
+                    'item': food_item,
+                    'quantity': data['quantity'],
+                    'subtotal': subtotal,
+                    'item_id': int(item_id_str), # Used for removal/checkout for Session items
+                    'is_session_item': True
+                })
+            except FoodItem.DoesNotExist:
+                # Clean up invalid items from the session
+                del session_cart[item_id_str]
+                request.session.modified = True
+                continue
+
+    context = {
+        'cart_items': cart_items_display, 
+        'total_price': total_price,
+        'RAZORPAY_KEY_ID': settings.RAZORPAY_KEY_ID,
+    }
     return render(request, 'cart.html', context)
 
 
@@ -263,77 +306,128 @@ def add_to_cart(request, item_id):
     food_item = get_object_or_404(FoodItem, id=item_id)
 
     if request.method == "POST":
-        quantity = int(request.POST.get("quantity", 1))
-        cart_item, created = Cart.objects.get_or_create(
-            student=request.user, food_item=food_item, defaults={'quantity': quantity}
-        )
-        if not created:
-            cart_item.quantity += quantity
-            cart_item.save()
+        # Ensure 'quantity' is safely retrieved and is an integer
+        try:
+            quantity = int(request.POST.get("quantity", 1))
+        except ValueError:
+            quantity = 1 # Default to 1 if input is invalid
 
-        return redirect('place_order')  
+        # --- CORE LOGIC CHANGE ---
+        if request.user.is_authenticated:
+            # ✅ SCENARIO A: LOGGED-IN USER (Use the Database Model)
+            cart_item, created = Cart.objects.get_or_create(
+                student=request.user, 
+                food_item=food_item, 
+                defaults={'quantity': quantity}
+            )
+            if not created:
+                cart_item.quantity += quantity
+                cart_item.save()
 
-    return render(request, 'student_menu.html', {'item': food_item})
+        else:
+            # 👤 SCENARIO B: ANONYMOUS USER (Use the Session)
+            # Session cart structure: {'5': {'quantity': 2, 'price': 150}, '10': {'quantity': 1, 'price': 200}}
+            session_cart = request.session.get('cart', {})
+            item_key = str(item_id) # Keys in a session must be strings
+
+            if item_key in session_cart:
+                # Item exists, just update quantity
+                session_cart[item_key]['quantity'] += quantity
+            else:
+                # New item, add to cart dict
+                session_cart[item_key] = {
+                    'quantity': quantity,
+                    'price': food_item.price, # Store price to avoid DB lookup later
+                    'name': food_item.name
+                }
+            
+            # Save the updated cart back to the session
+            request.session['cart'] = session_cart
+            request.session.modified = True # Tell Django the session dictionary changed
+
+        return redirect('place_order') 
+
+    # If the request method is GET, just render the menu (optional logic)
+    # This return needs to be adjusted based on where the POST form is.
+    return redirect('student_home') 
 
 def remove_from_cart(request):
     if request.method == 'POST':
         student = request.user
-        item_id = request.POST.get('item_id')
-        if not item_id:
+        item_name = request.POST.get('item_name')
+        if not item_name:
             return redirect('place_order')
-        cart_item = get_object_or_404(Cart, student=student, id=item_id)
+        
+        cart_item = get_object_or_404(Cart, student=student, food_item__name=item_name)
+        
         if cart_item.quantity > 1:
             cart_item.quantity -= 1
             cart_item.save()
         else:
             cart_item.delete()
+        
         return redirect('place_order')
     
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 def create_razorpay_order(request):
+    print("Razorpay Key ID:", settings.RAZORPAY_KEY_ID)
+    print("Razorpay Key Secret:", settings.RAZORPAY_KEY_SECRET)
     if request.method == "POST":
         cart_items = Cart.objects.filter(student=request.user)
 
         if not cart_items.exists():
             return JsonResponse({"error": "Cart is empty"}, status=400)
 
-        total_amount = sum(item.food_item.price * item.quantity for item in cart_items) * 100  # Convert to paise
+        total_amount = sum(item.food_item.price * item.quantity for item in cart_items) * 100  # in paise
 
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
         order_data = {
             "amount": int(total_amount),
             "currency": "INR",
-            "payment_capture": "1"  
+            "payment_capture": 1  # auto capture
         }
-        order = client.order.create(order_data)
 
-        return JsonResponse({"order_id": order["id"], "amount": total_amount, "currency": "INR"})
+        razorpay_order = client.order.create(data=order_data)
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+        return JsonResponse({
+            "order_id": razorpay_order.get("id"),
+            "amount": total_amount,
+            "currency": "INR"
+        })
 
+    return HttpResponseBadRequest("Invalid request method")
+
+@csrf_exempt
 def payment_success(request):
-    
-    cart_items = Cart.objects.filter(student=request.user)
-    if not cart_items.exists():
-        return render(request, 'payment_success.html', {"error": "Cart is empty."})
-    for cart in cart_items:
-        existing_order = Order.objects.filter(student=cart.student, food_item=cart.food_item, status="Pending").first()
+    if request.method == "POST":
+        data = json.loads(request.body)
+        params_dict = {
+            'razorpay_order_id': data.get('razorpay_order_id'),
+            'razorpay_payment_id': data.get('razorpay_payment_id'),
+            'razorpay_signature': data.get('razorpay_signature')
+        }
 
-        if existing_order:
-            existing_order.quantity += cart.quantity
-            existing_order.total_price += cart.food_item.price * cart.quantity  # Update total price
-            existing_order.save()
-        else:
-            
-            Order.objects.create(
-                student=cart.student,
-                food_item=cart.food_item,
-                quantity=cart.quantity,
-                total_price=cart.food_item.price * cart.quantity,  
-                status="Pending"
-            )
-    cart_items.delete()
-    return render(request, 'payment_success.html')
+        try:
+            # Verify the payment signature
+            client.utility.verify_payment_signature(params_dict)
+        except SignatureVerificationError:
+            return JsonResponse({'status': 'failure'}, status=400)
+
+        # Payment is verified - process the order here (save order, clear cart, etc.)
+        # Example: create Order object for user
+
+        # order = Order.objects.create(user=request.user, ...)
+        # cart_items = Cart.objects.filter(student=request.user)
+        # Save order details logic here...
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'invalid request'}, status=400)
+
+def stock_management_view(request):
+    """Temporary placeholder view for stock management."""
+    # Eventually, you will add your actual stock management logic here.
+    return HttpResponse("<h1>Stock Management Page - Work In Progress</h1>")
     
 
         

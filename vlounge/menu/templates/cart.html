@@ -49,7 +49,7 @@
 
         td {
             padding: 1rem;
-            background-color: #2D2D2D;
+            background-color: #ffffff;
             border-top: 1px solid #3D3D3D;
         }
 
@@ -132,20 +132,22 @@
             </thead>
             <tbody>
                 {% for item in cart_items %}
-                <tr>
-                    <form action="{% url 'remove_from_cart'%}" method="POST">
-                        {% csrf_token %}
-                        <input type='hidden' name='item_id' value='{{item.id}}'>
-                        <td>{{ item.food_item.name }}</td>
+                    <tr>
+                        <td>{{ item.item.name }}</td>
                         <td>{{ item.quantity }}</td>
-                        <td>₹{{ item.food_item.price|floatformat:2 }}</td>
-                        <td>                    
-                            <button class="btn-remove" type="submit" title="Remove item">🗑️ Remove</button>
+                        <td>₹{{ item.item.price|floatformat:2 }}</td>
+                        <td>
+                            <form action="{% url 'remove_from_cart' %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <!-- Make sure item.id is not empty -->
+                                <input type="hidden" name="item_name" value="{{ item.item.name }}">
+                                <button class="btn-remove" type="submit" title="Remove item">🗑️ Remove</button>
+                            </form>
                         </td>
-                    </form>
-                </tr>
+                    </tr>
                 {% endfor %}
             </tbody>
+
         </table>
         <p class="total">Total: ₹{{ total_price|floatformat:2 }}</p>
         <form id="razorpay-form">

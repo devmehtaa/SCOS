@@ -89,6 +89,11 @@
     </style>
 </head>
 <body>
+    {% if user.is_staff %}
+        {% include 'navbar_staff.html' %}
+    {% else %}
+        {% include 'navbar_student.html' %}
+    {% endif %}
     <div class="container">
         <h1>Account Information</h1>
         <div class="info">
@@ -106,10 +111,12 @@
         
 
         <div class="button-container">
-            <form action="/Smart-Canteen-Ordering-System/vlounge/authentication/templates/logout.html" method="post" style="width: 48%;">
+            <form action="{% url 'authentication:logout' %}" method="post" style="width: 48%;">
+                {% csrf_token %}
                 <button type="submit" class="logout-btn">Log Out</button>
             </form>
-            <form action="/Smart-Canteen-Ordering-System/vlounge/authentication/templates/password_reset.html" method="post" style="width: 48%;">
+            <form action="{%url 'authentication:password_reset'%}" method="post" style="width: 48%;">
+                {% csrf_token %}
                 <button type="submit" class="reset-btn">Reset Password</button>
             </form>
         </div>

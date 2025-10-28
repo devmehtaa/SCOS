@@ -6,45 +6,65 @@
     <title>Document</title>
 </head>
 <body>
-    <form id="razorpay-form">
-        {% csrf_token %}
-        <button type="button" id="pay-btn" class="checkout-btn">Pay with Razorpay</button>
-    </form>
-    
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-        document.getElementById("pay-btn").onclick = function () {
-            fetch("{% url 'create_razorpay_order' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.order_id) {
-                    var options = {
-                        "key": "{{ RAZORPAY_KEY_ID }}",
-                        "amount": data.amount,
-                        "currency": data.currency,
-                        "name": "Smart Canteen",
-                        "description": "Order Payment",
-                        "order_id": data.order_id,
-                        "handler": function (response) {
-                            window.location.href = "/payment-success/";
+    {% csrf_token %}
+<form id="razorpay-form">
+    <button type="button" id="pay-btn" class="checkout-btn">Pay with Razorpay</button>
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById("pay-btn").onclick = function() {
+    fetch("{% url 'create_razorpay_order' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.order_id) {
+            var options = {
+                "key": "{{ RAZORPAY_KEY_ID }}",
+                "amount": data.amount,
+                "currency": data.currency,
+                "name": "Smart Canteen",
+                "description": "Order Payment",
+                "order_id": data.order_id,
+                // This handler is called after payment success
+                "handler": function (response) {
+                    // After payment, send payment details to server for verification
+                    fetch("{% url 'payment_success' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
                         },
-                        "theme": {
-                            "color": "#3399cc"
+                        body: JSON.stringify(response)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("Payment successful!");
+                            window.location.href = "/";  // redirect after success
+                        } else {
+                            alert("Payment verification failed!");
                         }
-                    };
-                    var rzp = new Razorpay(options);
-                    rzp.open();
-                } else {
-                    alert("Error creating Razorpay order!");
+                    });
+                },
+                "theme": {
+                    "color": "#3399cc"
                 }
-            });
-        };
-    </script>
+            };
+            var rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert("Error creating order with Razorpay");
+        }
+    })
+    .catch(err => alert("Error: " + err));
+};
+</script>
+
     
 </body>
 </html>

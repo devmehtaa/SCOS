@@ -6,15 +6,21 @@ from django.contrib import messages
 # Login View
 def login_view(request):
     if request.method == "POST":
+        print("hi")
         username = request.POST["username"]
         password = request.POST["password"]
+        print(f"Attempting to authenticate user: {username}")
         user = authenticate(request, username=username, password=password)
+        print(f"Result of authenticate(): {user}") 
         if user is not None:
             login(request, user)
+            print(f"DEBUG: User logged in: {request.user.is_authenticated}") 
+            print(f"DEBUG: User object: {request.user}") 
             return redirect("menu_home")  # Change "home" to your dashboard or menu page
         else:
             messages.error(request, "Invalid username or password")
-    
+
+    print("login view executed")
     return render(request, "login.html")
 
 
@@ -35,7 +41,7 @@ def signup_view(request):
 # Logout View
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("authentication:login")
 
 
 # Password Reset View 
