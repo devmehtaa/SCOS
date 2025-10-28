@@ -21,3 +21,20 @@ A website based solution is made to address the issue. Where students can place 
 7.  `python manage.py createsuperuser` to create your first user to login
 8.  `python manage.py runserver` to start the server
 9. `click on the URL provided in the terminal`
+
+## Users
+- You can go `/admin` in URL to go to the admin page where you can see the entire database and make new users.
+- if you login with a non - staff user you will be redirected to a student page.
+- if you login with a staff user then you will be redirected to the staff page.
+
+## Features of SCOS
+- Authentication system (Staff & Student Login)
+- Staff
+    - Select Menu Item 
+    - check pending orders
+    - account information
+- Student
+    - Place Orders
+    - Payment through Razorpay
+    - Account Information
+
